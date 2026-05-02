@@ -18,7 +18,11 @@
                 <input type="password" id="password" placeholder="Password" autocomplete="current-password" required minlength="6">
 
                 <div class="show">
-                    <label><input type="checkbox" id="showPassword"> Show Password</label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showPassword" class="custom-checkbox"> 
+                        <span class="checkbox-custom"></span>
+                        Show Password
+                    </label>
                 </div>
 
                 <button type="submit" id="submitBtn">SIGN IN</button>
@@ -53,7 +57,11 @@
                 <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" autocomplete="new-password" required minlength="6">
 
                 <div class="show">
-                    <label><input type="checkbox" id="showSignupPassword"> Show Password</label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showSignupPassword" class="custom-checkbox">
+                        <span class="checkbox-custom"></span>
+                        Show Password
+                    </label>
                 </div>
 
                 <button type="submit" id="signupBtn">CREATE ACCOUNT</button>
@@ -134,12 +142,32 @@
 
             // Use Recovered Credentials
             document.getElementById('useCredentialsBtn').addEventListener('click', function() {
-                var email = document.getElementById('recoveredEmailDisplay').textContent;
-                var password = document.getElementById('recoveredPasswordDisplay').textContent;
-                document.getElementById('email').value = email;
-                document.getElementById('password').value = password;
-                document.getElementById('forgotForm').style.display = 'none';
-                document.getElementById('loginForm').style.display = 'block';
+                var email = document.getElementById('recoveredEmailDisplay').textContent.trim();
+                var password = document.getElementById('recoveredPasswordDisplay').textContent.trim();
+                
+                console.log('Email:', email);
+                console.log('Password:', password);
+                
+                // Populate the login form fields
+                var emailField = document.getElementById('email');
+                var passwordField = document.getElementById('password');
+                
+                emailField.value = email;
+                passwordField.value = password;
+                
+                // Force update for autocomplete
+                emailField.dispatchEvent(new Event('input', { bubbles: true }));
+                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // Wait a moment then switch forms
+                setTimeout(function() {
+                    document.getElementById('forgotForm').style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'block';
+                    
+                    // Focus on password field to show it's populated
+                    passwordField.focus();
+                    passwordField.blur();
+                }, 100);
             });
 
             // Login Form Submit
