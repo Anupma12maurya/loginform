@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login Form 1</title>
+        <link rel="stylesheet" href="style1.css">
+    </head>
+
+    <body>
+
+        <div class="container">
+            <form id="loginForm">
+                <h2>Login</h2>
+
+                <input type="email" id="email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password" required minlength="6">
+
+                <div class="show">
+                    <label><input type="checkbox" id="showPassword"> Show Password</label>
+                </div>
+
+                <button type="submit" id="submitBtn">SIGN IN</button>
+
+                <p><a href="#" id="forgotLink">Forgot Username / Password?</a></p>
+                <p>Don't have an account? <a href="#" id="toggleForm">Sign up</a></p>
+                <div id="message" class="message"></div>
+            </form>
+
+            <div id="forgotForm" class="form-container" style="display: none;">
+                <h2>Recover Account</h2>
+                <p class="recover-text">Enter your registered email to retrieve your credentials</p>
+
+                <input type="email" id="recoverEmail" placeholder="Enter your email" autocomplete="email" required>
+                <button type="button" id="recoverBtn">RECOVER ACCOUNT</button>
+
+                <div id="recoveredCredentials" class="credentials-box" style="display: none;">
+                    <h3>Your Credentials</h3>
+                    <p><strong>Email:</strong> <span id="recoveredEmailDisplay"></span></p>
+                    <p><strong>Password:</strong> <span id="recoveredPasswordDisplay"></span></p>
+                    <button type="button" id="useCredentialsBtn" class="use-btn">Use These Credentials</button>
+                </div>
+
+                <div id="recoverMessage" class="message"></div>
+                <p style="margin-top: 20px;"><a href="#" id="backToLogin">Back to Login</a></p>
+            </div>
+
+            <form id="signupForm" style="display: none;">
+                <h2>Sign Up</h2>
+
+                <input type="email" id="signupEmail" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" autocomplete="new-password" required minlength="6">
+
+                <div class="show">
+                    <label><input type="checkbox" id="showSignupPassword"> Show Password</label>
+                </div>
+
+                <button type="submit" id="signupBtn">CREATE ACCOUNT</button>
+
+                <p>Already have an account? <a href="#" id="toggleLoginForm">Sign in</a></p>
+                <div id="signupMessage" class="message"></div>
+            </form>
+        </div>
+
+        <script>
+            // Show/Hide Password - Login
+            document.getElementById('showPassword').addEventListener('change', function() {
+                var passwordField = document.getElementById('password');
+                passwordField.type = this.checked ? 'text' : 'password';
+            });
+
+            // Show/Hide Password - Signup
+            if (document.getElementById('showSignupPassword')) {
+                document.getElementById('showSignupPassword').addEventListener('change', function() {
+                    var passwordField = document.getElementById('signupPassword');
+                    passwordField.type = this.checked ? 'text' : 'password';
+                });
+            }
+
+            // Toggle Login/Signup Forms
+            document.getElementById('toggleForm').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('loginForm').style.display = 'none';
+                if (document.getElementById('signupForm')) {
+                    document.getElementById('signupForm').style.display = 'block';
+                }
+            });
+
+            if (document.getElementById('toggleLoginForm')) {
+                document.getElementById('toggleLoginForm').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('signupForm').style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'block';
+                });
+            }
+
+            // Forgot Password - Show Form
+            document.getElementById('forgotLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('forgotForm').style.display = 'block';
+                document.getElementById('recoveredCredentials').style.display = 'none';
+                document.getElementById('recoverEmail').value = '';
+            });
+
+            // Back to Login
+            document.getElementById('backToLogin').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('forgotForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            });
+
+            // Recover Account
+            document.getElementById('recoverBtn').addEventListener('click', function() {
+                var email = document.getElementById('recoverEmail').value;
+                var messageDiv = document.getElementById('recoverMessage');
+                var credentialsBox = document.getElementById('recoveredCredentials');
+                var storedCreds = JSON.parse(localStorage.getItem('credentials')) || [];
+                
+                var user = storedCreds.find(cred => cred.email === email);
+                
+                if (user) {
+                    document.getElementById('recoveredEmailDisplay').textContent = user.email;
+                    document.getElementById('recoveredPasswordDisplay').textContent = user.password;
+                    credentialsBox.style.display = 'block';
+                    messageDiv.textContent = '';
+                } else {
+                    messageDiv.textContent = 'No account found with this email. Please sign up first.';
+                    messageDiv.className = 'message error';
+                    credentialsBox.style.display = 'none';
+                }
+            });
+
+            // Use Recovered Credentials
+            document.getElementById('useCredentialsBtn').addEventListener('click', function() {
+                var email = document.getElementById('recoveredEmailDisplay').textContent;
+                var password = document.getElementById('recoveredPasswordDisplay').textContent;
+                document.getElementById('email').value = email;
+                document.getElementById('password').value = password;
+                document.getElementById('forgotForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            });
+
+            // Login Form Submit
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var email = document.getElementById('email').value;
+                var password = document.getElementById('password').value;
+                var messageDiv = document.getElementById('message');
+                
+                if (email && password.length >= 6) {
+                    // Save to localStorage
+                    var storedCreds = JSON.parse(localStorage.getItem('credentials')) || [];
+                    var exists = storedCreds.find(cred => cred.email === email);
+                    if (!exists) {
+                        storedCreds.push({ email: email, password: password });
+                        localStorage.setItem('credentials', JSON.stringify(storedCreds));
+                    }
+                    
+                    messageDiv.textContent = 'Login successful! Welcome, ' + email;
+                    messageDiv.className = 'message success';
+                    setTimeout(() => {
+                        document.getElementById('loginForm').reset();
+                        messageDiv.textContent = '';
+                    }, 2000);
+                } else {
+                    messageDiv.textContent = 'Please fill in all fields correctly. Password must be at least 6 characters.';
+                    messageDiv.className = 'message error';
+                }
+            });
+
+            // Signup Form Submit (if exists)
+            if (document.getElementById('signupForm')) {
+                document.getElementById('signupForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var email = document.getElementById('signupEmail').value;
+                    var password = document.getElementById('signupPassword').value;
+                    var messageDiv = document.getElementById('signupMessage');
+                    
+                    if (email && password.length >= 6) {
+                        var storedCreds = JSON.parse(localStorage.getItem('credentials')) || [];
+                        var exists = storedCreds.find(cred => cred.email === email);
+                        if (exists) {
+                            messageDiv.textContent = 'Account already exists with this email!';
+                            messageDiv.className = 'message error';
+                        } else {
+                            storedCreds.push({ email: email, password: password });
+                            localStorage.setItem('credentials', JSON.stringify(storedCreds));
+                            messageDiv.textContent = 'Account created successfully!';
+                            messageDiv.className = 'message success';
+                            setTimeout(() => {
+                                document.getElementById('signupForm').reset();
+                                document.getElementById('signupForm').style.display = 'none';
+                                document.getElementById('loginForm').style.display = 'block';
+                                messageDiv.textContent = '';
+                            }, 2000);
+                        }
+                    } else {
+                        messageDiv.textContent = 'Please fill in all fields correctly. Password must be at least 6 characters.';
+                        messageDiv.className = 'message error';
+                    }
+                });
+            }
+        </script>
+
+    </body>
+
+</html>
